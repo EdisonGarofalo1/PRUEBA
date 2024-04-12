@@ -47,7 +47,7 @@ public class UsuarioServiceImp implements UsuarioService{
 		try {
 
 			
-			  
+			
 			Usuario Guardada =   usuarioRepository.save(usuario);
 
 			return Guardada;

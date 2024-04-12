@@ -24,6 +24,7 @@ import aplicativo.prueba.dto.UsuarioListarDTO;
 import aplicativo.prueba.dto.UsuariomeEditarAgregarDTO;
 import aplicativo.prueba.model.Persona;
 import aplicativo.prueba.model.Usuario;
+import aplicativo.prueba.repository.UsuarioRepository;
 import aplicativo.prueba.service.PersonaService;
 import aplicativo.prueba.service.UsuarioService;
 import io.swagger.annotations.Api;
@@ -42,6 +43,9 @@ public class UsuarioController {
 	private  UsuarioService    usuarioService;
 	@Autowired
 	private  PersonaService    personaService;
+	
+	@Autowired
+	   private UsuarioRepository   usuarioRepository;
 	
 	 @Autowired
 	    private ModelMapper modelMapper;
@@ -97,8 +101,18 @@ public class UsuarioController {
              return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("La contraseña no cumple con los requisitos.");
          }
         
+		
+		 Usuario usuarioExistente = usuarioRepository.findByUsernameOrEmail(usuarioDTO.getUserName(), usuarioDTO.getUserName());
+	        if (usuarioExistente != null) {
+	            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El nombre de usuario ya está en uso.");
+	        }
+
+		 
+		 
 			Persona persona =personaService.findById(usuarioDTO.getIdPersona());
 			String correo = personaService.generarCorreoElectronico(persona);
+			
+			
 			
 			Usuario usuario = new Usuario();
 			usuario.setUserName(usuarioDTO.getUserName());
@@ -148,6 +162,8 @@ public class UsuarioController {
 				
 				
 				Usuario guardar= usuarioService.save(usuario);
+				
+			
 			    if (guardar != null) {
 		            return ResponseEntity.ok("Guardar exitoso"); 
 		        } else {
