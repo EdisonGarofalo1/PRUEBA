@@ -3,12 +3,15 @@ package aplicativo.prueba.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import aplicativo.prueba.dto.LoginDTO;
+import aplicativo.prueba.dto.PasswordDTO;
 import aplicativo.prueba.model.Usuario;
 import aplicativo.prueba.repository.UsuarioRepository;
 import aplicativo.prueba.service.SesionService;
@@ -27,22 +30,38 @@ public class SesionController {
 	private  SesionService    sesionService;
 	@Autowired
 	private UsuarioRepository usuarioRepository;
+	
 	  @PostMapping("/login")
-	    public ResponseEntity<String> login(@RequestBody LoginDTO login) throws Exception {
-		   
+	    public PasswordDTO login(@RequestBody LoginDTO login) throws Exception {
+		  
 		  boolean tieneSesionActiva = sesionService.usuarioTieneSesionActiva(login.getUsernameOrEmail(), login.getPassword());
           if (tieneSesionActiva) {
-              return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Ya tiene una sesión activa.");
+            
+              
+              PasswordDTO loginError = new PasswordDTO();
+	            loginError.setMessage("a tiene una sesión activa.");
+	            return loginError;
           }
+		  
 		  
 		  Usuario usuarioAutenticado =sesionService.login(login.getUsernameOrEmail(), login.getPassword());
 	       
 		  
 		  if (usuarioAutenticado != null) {
-	            return ResponseEntity.ok("Login exitoso"); 
+			  PasswordDTO login1 = new PasswordDTO();
+	            login1.setMail(usuarioAutenticado.getMail());
+	            login1.setUserName(usuarioAutenticado.getUserName());
+	            login1.setPassword(usuarioAutenticado.getPassword());
+	            login1.setMessage("Login exitoso");
+	            
+	            return login1; 
 	        } else {
-	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenciales incorrectas");
+	         
+	        	PasswordDTO loginError = new PasswordDTO();
+	            loginError.setMessage("Credenciales incorrectas");
+	            return loginError;
 	        }
+	        
 	       
 	   }
 	
@@ -58,5 +77,31 @@ public class SesionController {
 	            return ResponseEntity.badRequest().body("Usuario no encontrado");
 	        }
 	    }
+	  
+	  
+	  @GetMapping("/password/{usernameOrEmail}")
+	    public PasswordDTO logout(@PathVariable String usernameOrEmail) {
+	     
+	        Usuario usuario = usuarioRepository.findByUsernameOrEmail(usernameOrEmail,usernameOrEmail);
+	        
+	        if (usuario != null) {
+	          
+	        	PasswordDTO login = new PasswordDTO();
+	            login.setMail(usuario.getMail());
+	            login.setUserName(usuario.getUserName());
+	            login.setPassword(usuario.getPassword());
+	            login.setMessage("Recuperacion exitoso");
+	            
+	            return login; 
+	        } else {
+	         
+	        	PasswordDTO loginError = new PasswordDTO();
+	            loginError.setMessage("Usuario no encontrado");
+	            return loginError;
+	        }
+	        
+	       
+	    }
+
 
 }
