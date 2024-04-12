@@ -55,4 +55,13 @@ public class SesionServiceImpl  implements SesionService{
 		 return sesionActiva.isPresent();
     }
 	
+	
+	 public void registrarCierreSesion(Integer idusuario) {
+	        Optional<Sesion> sesionAbierta = sesionRepository.findFirstByUsuarioAndFechaCierre(idusuario);
+	        sesionAbierta.ifPresent(sesion -> {
+	            sesion.setFechaCierre( new Date(System.currentTimeMillis()));
+	            sesionRepository.save(sesion);
+	        });
+	    }
+	
 }

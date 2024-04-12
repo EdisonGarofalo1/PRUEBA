@@ -5,10 +5,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import aplicativo.prueba.dto.LoginDTO;
 import aplicativo.prueba.model.Usuario;
+import aplicativo.prueba.repository.UsuarioRepository;
 import aplicativo.prueba.service.SesionService;
 
 import io.swagger.annotations.Api;
@@ -23,6 +25,8 @@ public class SesionController {
 	
 	@Autowired
 	private  SesionService    sesionService;
+	@Autowired
+	private UsuarioRepository usuarioRepository;
 	  @PostMapping("/login")
 	    public ResponseEntity<String> login(@RequestBody LoginDTO login) throws Exception {
 		   
@@ -42,5 +46,17 @@ public class SesionController {
 	       
 	   }
 	
+	  
+	  @PostMapping("/logout")
+	    public ResponseEntity<Object> logout(@RequestParam Integer usuarioId) {
+	     
+	        Usuario usuario = usuarioRepository.findById(usuarioId).orElse(null);
+	        if (usuario != null) {
+	            sesionService.registrarCierreSesion(usuarioId);
+	            return ResponseEntity.ok("Sesión cerrada correctamente");
+	        } else {
+	            return ResponseEntity.badRequest().body("Usuario no encontrado");
+	        }
+	    }
 
 }
